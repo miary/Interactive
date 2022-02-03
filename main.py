@@ -4,6 +4,10 @@ from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 st.title("Machine Learning Dashboard")
 
@@ -51,7 +55,7 @@ params = add_parameters_ui(classifier_name)
 
 def get_classifier(clf_name, params):
     if clf_name == "KNN":
-        clf = KNeighborsClassifier(n_estimators=params["K"])
+        clf = KNeighborsClassifier(n_neighbors=params["K"])
     elif clf_name == "SVM":
         clf = SVC(C=params["C"])
     else:
@@ -60,3 +64,29 @@ def get_classifier(clf_name, params):
     return clf
 
 clf = get_classifier(classifier_name, params)
+
+# Classification
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+acc = accuracy_score(y_test, y_pred)
+st.write(f"Classifier = {classifier_name}")
+st.write(f"Accuracy = {acc}")
+
+# PLOT
+pca = PCA(2)
+X_projected = pca.fit_transform(X)
+
+x1 = X_projected[:,0]
+x2 = X_projected[:,1]
+
+fig = plt.figure()
+plt.scatter(x1, x2, c=y, alpha=0.8, cmap='viridis')
+plt.xlabel("Principal Comp 1")
+plt.ylabel("Principal Comp 2")
+plt.colorbar()
+
+st.pyplot(plt)
